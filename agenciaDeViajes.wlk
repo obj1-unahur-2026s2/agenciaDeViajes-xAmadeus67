@@ -7,10 +7,17 @@ class Pack {
     method duracion() = duracion
     method precioBase() = precio
     method beneficios() = beneficios
+    method cantBeneficios() {
+        return beneficios.size()
+    }
     method coordinadorACargo() = coordinador
+    method costoTotalDeBeneficios() {
+        return beneficios.sum({b=>b.costo()})
+    }
     method valorFinal() {
-        return self.precioBase() + beneficios.costo()
+        return self.precioBase() + self.costoTotalDeBeneficios()
     } 
+    method esPremium()
 }
 
 class Internacional inherits Pack {
@@ -21,6 +28,14 @@ class Internacional inherits Pack {
   method destino() = destino
   method cantEscalas() = escalas
   method esDeInteres() = interes
+  override method valorFinal() {
+    return super() + super() * 0.2
+  }
+  override method esPremium() {
+    return self.esDeInteres() && 
+            self.duracion() > 20 &&
+            self.cantEscalas() == 0
+  }
 }
 
 class Nacional inherits Pack {
@@ -29,7 +44,29 @@ class Nacional inherits Pack {
 
     method destino() = destino
     method actividades() = actividades
+    method cantDeActividades() {
+        return actividades.size()
+    }
+    override method esPremium() {
+        return self.duracion() > 10 && coordinador.esAltamenteCalificado()
+    }
+}
 
+class Provincial inherits Nacional {
+    const cantCiudades
+
+    method cantCiudadesAVisitar() = cantCiudades
+    override method esPremium() {
+      return self.cantDeActividades() > 4 &&
+          self.cantCiudadesAVisitar() > 5
+          self.cantBeneficios() >= 3
+    }
+    override method valorFinal() {
+        return if (self.esPremium())
+            super() + super() * 0.05
+            else 
+                super()
+    }
 }
 
 ///COORDINADOR 
@@ -53,6 +90,14 @@ class Coordinador {
     else 
     self.error("este rol no existe")
   }
+  method esAltamenteCalificado() {
+    return self.cantViajesRealizados() > 20 && self.cumpleRol()
+  }
+  method cumpleRol() {
+    return if (rol == "guia") self.estaMotivado() 
+        else if (rol == "asistenteLogistico") self.añosDeExperiencia() >= 3
+        else true
+  }
 }
 
 /// BENEFICIOS 
@@ -65,3 +110,4 @@ class BeneficiosOpcionales {
   method costo() = costo
   method vigente() = vigente
 }
+
