@@ -1,0 +1,63 @@
+import agenciaDeViajes-xAmadeus67.agenciaDeViajes.*
+describe "testeo de packs" {
+  test "Un pack nacional sin beneficios vigentes devuelve el mismo precio base que es 50." {
+    const packNacional = new Nacional(duracion=3,precio=50,coordinador="",destino="iguazu")
+    assert.equals(50, packNacional.valorFinal())
+  }
+  test "Un pack nacional con 2 beneficios vigentes suma correctamente sus costos al precio base que seria 50 + 35 + 15 = 100." {
+    const b1 = new BeneficiosOpcionales(tipo="trasladoPrivado",costo=35,vigente=true)
+    const b2 = new BeneficiosOpcionales(tipo="seguroAdicional",costo=15,vigente=true)
+    const packNacional = new Nacional(duracion=3,precio=50,beneficios=[b1,b2],coordinador="",destino="iguazu")
+
+    assert.equals(100, packNacional.valorFinal())
+  }
+  test "Un pack internacional sin beneficios vigentes calcula correctamente el precio que es 50 con el 20% de recargo que quedaria en 60." {
+    const packInternacional = new Internacional(duracion=3,precio=50,coordinador="",destino="Buzios",escalas=1,interes=true)
+    assert.equals(60, packInternacional.valorFinal())
+  }
+  //testeo de metodo agregado si es o no premium
+  test "el pack nacional tupac es premium porque su coordinador pancho es altamente calificado y dura 11 dias" {
+    const pancho = new Coordinador(motivado=true,añosXP=3,cantViajes=21,rol="guia")
+    const tupac = new Nacional(duracion=11,precio=50,coordinador=pancho,destino="iguazu")
+    assert.that(tupac.esPremium())
+  }
+
+  //testeo de pack provincial
+  test "el precio base del pack provincial p es de 300 y es un pack premium por ende su valor final debera ser 315 " {
+    const pancho = new Coordinador(motivado=true,añosXP=3,cantViajes=21,rol="guia")
+    const b1 = new BeneficiosOpcionales(tipo="trasladoPrivado",costo=0,vigente=true)
+    const b2 = new BeneficiosOpcionales(tipo="trasladoPrivado",costo=0,vigente=true)
+    const b3 = new BeneficiosOpcionales(tipo="trasladoPrivado",costo=0,vigente=true)
+    const b4 = new BeneficiosOpcionales(tipo="trasladoPrivado",costo=0,vigente=true)
+    const p = new Provincial(duracion=11,precio=300,coordinador=pancho,destino="misiones",cantCiudades=6,actividades=[1,2,3,4,5],beneficios=[b1,b2,b3,b4])
+
+    assert.equals(315, p.valorFinal())
+  }
+  test "el pack p es premium porque supera las cantidades minimas de actividades, ciudades a visitar y beneficios" {
+    const pancho = new Coordinador(motivado=true,añosXP=3,cantViajes=21,rol="guia")
+    const b1 = new BeneficiosOpcionales(tipo="trasladoPrivado",costo=0,vigente=true)
+    const b2 = new BeneficiosOpcionales(tipo="trasladoPrivado",costo=0,vigente=true)
+    const b3 = new BeneficiosOpcionales(tipo="trasladoPrivado",costo=0,vigente=true)
+    const b4 = new BeneficiosOpcionales(tipo="trasladoPrivado",costo=0,vigente=true)
+    const p = new Provincial(duracion=11,precio=300,coordinador=pancho,destino="misiones",cantCiudades=6,actividades=[1,2,3,4,5],beneficios=[b1,b2,b3,b4])
+
+    assert.that(p.esPremium())
+  }
+}
+
+
+
+describe "testeo coordinador" {
+  test "Un guía motivado con 21 viajes realizados es considerado altamente calificado." {
+    const c1 = new Coordinador(motivado=true,añosXP=3,cantViajes=21,rol="guia")
+    assert.that(c1.esAltamenteCalificado())
+  }
+  test "Un asistente logístico con menos de 3 años de experiencia no es calificado, aunque tenga muchos viajes." {
+    const c2 = new Coordinador(motivado=true,añosXP=2,cantViajes=21,rol="asistenteLogistico")
+    assert.notThat(c2.esAltamenteCalificado())
+  }
+  test "Un acompañante con cualquier cantidad de viajes es siempre calificado si supera los 20." {
+    const c2 = new Coordinador(motivado=true,añosXP=2,cantViajes=21,rol="acompañante")
+    assert.that(c2.esAltamenteCalificado())
+  }
+}
